@@ -67,14 +67,14 @@
 
         firebase.auth().onAuthStateChanged(user => { });
 
-        var commentsRef = firebase.database().ref('test').orderByChild('-time');
+        var databaseRef = firebase.database().ref('test').orderByChild('-time');
         var ul = document.querySelector("ul");
 
-        commentsRef.on('child_added', (data) => {
-          // console.error(data.val());
+        databaseRef.on('child_added', (data) => {
           if (!data.val().complete) {
           
           var listItem = document.createElement("li");
+          listItem.id = data.val().key;
           listItem.textContent = data.val().description;
 
           if(ul.childNodes.length > 0) {
@@ -84,6 +84,21 @@
           }
           }
         });
+
+        databaseRef.on('child_changed', (data) => {
+          var li = document.getElementById(data.val().key);
+          if (li != null) {
+            li.textContent = data.val().description;
+          }
+        });
+
+        databaseRef.on('child_removed', (data) => {
+          var li = document.getElementById(data.val().key);
+          if (li != null) {
+            li.parentNode.removeChild(li);
+          }
+        }
+        );
 
   // addCommentElement(postElement, data.key, data.val().text, data.val().author);
 
