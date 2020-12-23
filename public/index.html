@@ -86,19 +86,17 @@
         });
 
         databaseRef.on('child_changed', (data) => {
+          console.error(data.val());
           var li = document.getElementById(data.val().key);
           if (li != null) {
-            li.textContent = data.val().description;
+            if (data.val().complete == true) {
+              li.parentNode.removeChild(li);
+            } else {
+              li.textContent = data.val().description;
+
+            }
           }
         });
-
-        databaseRef.on('child_removed', (data) => {
-          var li = document.getElementById(data.val().key);
-          if (li != null) {
-            li.parentNode.removeChild(li);
-          }
-        }
-        );
 
   // addCommentElement(postElement, data.key, data.val().text, data.val().author);
 
