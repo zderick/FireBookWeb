@@ -36,6 +36,7 @@
         body, #message { margin-top: 0; background: white; box-shadow: none; }
         body { border-top: 16px solid #ffa100; }
       }
+      .button {  background-color: red; border-radius: 50%; color: white;}
     </style>
   </head>
   <body>
@@ -67,15 +68,34 @@
 
         firebase.auth().onAuthStateChanged(user => { });
 
-        var databaseRef = firebase.database().ref('test').orderByChild('-time');
+        var databaseRef = firebase.database().ref('test').orderByChild('time');
         var ul = document.querySelector("ul");
 
         databaseRef.on('child_added', (data) => {
           if (!data.val().complete) {
           
           var listItem = document.createElement("li");
+          var button = document.createElement("button");
+          button.textContent = "x";
+          button.id = data.val().key + "button";
+          button.className = "button";
+          button.onclick = function() {deleteTodo(data)};
           listItem.id = data.val().key;
           listItem.textContent = data.val().description;
+          listItem.appendChild(button);
+
+          function deleteTodo(data) {
+            var databaseRef = firebase.database().ref('test');
+            var todo = {
+              key: data.val().key,
+              complete: true,
+              description: data.val().description,
+              time: data.val().time
+            };
+            console.error(todo);
+            databaseRef.child(todo.key).update(todo)
+          };
+
 
           if(ul.childNodes.length > 0) {
             ul.insertBefore(listItem, ul.childNodes[0]);
