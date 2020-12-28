@@ -36,7 +36,15 @@
         body, #message { margin-top: 0; background: white; box-shadow: none; }
         body { border-top: 16px solid #ffa100; }
       }
-      .button {  background-color: red; border-radius: 50%; color: white;}
+      .button {  margin: 0 15px 0 0; background-color: red; border-radius: 100%; color: white;  float: left;       
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */}
+      li { background:ECEFF1;  padding: 15px 15px; }
+      li:nth-child(odd) { background:rgb(212, 211, 211); }
     </style>
   </head>
   <body>
@@ -46,10 +54,10 @@
       <a target="_blank" href="https://merntodoapp.herokuapp.com/">MernTodoApp</a>
     </div>
     <!-- <p id="load">Firebase SDK Loading&hellip;</p> -->
-    Description:
-    <input type="text" id="description" style="width:500px;" ><br><br>
+    <p>Description: <input type="text" id="description" style="width:50%;" ><br><br>
+    </p>
 
-    <ul>
+    <ul style="list-style: none; padding:0">
  
     </ul>
 
@@ -77,6 +85,7 @@
           // Number 13 is the "Enter" key on the keyboard
           if (event.keyCode === 13) {
             addToDatabase();
+            inputBox.value =  "";
           }
         });
 
@@ -108,9 +117,9 @@
           button.id = data.val().key + "button";
           button.className = "button";
           button.onclick = function() {deleteTodo(data)};
-          listItem.id = data.val().key;
-          listItem.textContent = data.val().description;
           listItem.appendChild(button);
+          listItem.id = data.val().key;
+          listItem.append(data.val().description);
 
           function deleteTodo(data) {
             var databaseRef = firebase.database().ref('test');
