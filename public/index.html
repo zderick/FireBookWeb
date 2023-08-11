@@ -45,6 +45,12 @@
         user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */}
       li { background:ECEFF1;  padding: 15px 15px; }
       li:nth-child(odd) { background:rgb(212, 211, 211); }
+      textarea  
+      {  
+         font-family:Roboto, Helvetica, Arial;
+         font-size: 16px;
+         height: auto;
+      }
     </style>
   </head>
   <body>
@@ -89,6 +95,69 @@
           }
         });
 
+        var ul = document.querySelector("ul");
+        
+
+        query.on('child_added', (data) => {
+          if (!data.val().complete) {
+          
+          var listItem = document.createElement("li");
+          var button = document.createElement("button");
+          button.textContent = "x";
+          button.id = data.val().key + "button";
+          button.className = "button";
+          button.onclick = function() {deleteTodo(data)};
+          listItem.appendChild(button);
+          listItem.id = data.val().key;
+
+         var currentTextArea = document.createElement("TEXTAREA");
+          currentTextArea.type = "text";
+          currentTextArea.value = data.val().description;
+          currentTextArea.style = "width:50%";
+          currentTextArea.id = data.val().key + "textArea";
+
+
+          currentTextArea.addEventListener("keydown", function(event) {
+            resizeTextArea(this);
+            if (event.keyCode === 13 && !event.shiftKey) {
+              event.preventDefault();
+              editCurrentItem(data, currentTextArea.value);
+              this.blur()
+            }
+
+        });
+
+        listItem.appendChild(currentTextArea);
+
+
+        if(ul.childNodes.length > 0) {
+          ul.insertBefore(listItem, ul.childNodes[0]);
+        } else {
+          ul.appendChild(listItem);
+        }
+
+        resizeTextArea(currentTextArea);
+        }
+      });
+
+        query.on('child_changed', (data) => {
+          var li = document.getElementById(data.val().key);
+          if (li != null) {
+            if (data.val().complete == true) {
+              li.parentNode.removeChild(li);
+            } else {
+              var curTextArea = document.getElementById(data.val().key + "textArea");
+              curTextArea.value = data.val().description;
+            }
+          }
+        });
+
+        function resizeTextArea(textArea) {
+          textArea.style.height = "0px";
+          var height = textArea.scrollHeight;
+          textArea.style.height = height + "px";
+        }
+
         function addToDatabase() {
           var databaseRef = firebase.database().ref("test");
           var newPostKey = databaseRef.push().key;
@@ -117,22 +186,8 @@
           databaseRef.child(todo.key).update(todo);
         };
 
-        var ul = document.querySelector("ul");
-        
 
-        query.on('child_added', (data) => {
-          if (!data.val().complete) {
-          
-          var listItem = document.createElement("li");
-          var button = document.createElement("button");
-          button.textContent = "x";
-          button.id = data.val().key + "button";
-          button.className = "button";
-          button.onclick = function() {deleteTodo(data)};
-          listItem.appendChild(button);
-          listItem.id = data.val().key;
-
-          function deleteTodo(data) {
+        function deleteTodo(data) {
           if (confirm("Are you sure you want to delete?\n\n" + data.val().description)) {
             var databaseRef = firebase.database().ref('test');
             var todo = {
@@ -143,45 +198,7 @@
             };
             databaseRef.child(todo.key).update(todo);
           }
-          };
-
-         var currentTextBox = document.createElement("INPUT");
-          currentTextBox.type = "text";
-          currentTextBox.value = data.val().description;
-          currentTextBox.style = "width:50%";
-          currentTextBox.id = data.val().key + "textBox";
-          
-          currentTextBox.addEventListener("keyup", function(event) {
-          // Number 13 is the "Enter" key on the keyboard
-          if (event.keyCode === 13) {
-            editCurrentItem(data, currentTextBox.value);
-            this.blur()
-          }
-        });
-
-        listItem.appendChild(currentTextBox);
-
-
-          if(ul.childNodes.length > 0) {
-            ul.insertBefore(listItem, ul.childNodes[0]);
-          } else {
-            ul.appendChild(listItem);
-          }
-
-          }
-        });
-
-        query.on('child_changed', (data) => {
-          var li = document.getElementById(data.val().key);
-          if (li != null) {
-            if (data.val().complete == true) {
-              li.parentNode.removeChild(li);
-            } else {
-              var curTextBox = document.getElementById(data.val().key + "textBox");
-              curTextBox.value = data.val().description;
-            }
-          }
-        });
+        };
 
         // addCommentElement(postElement, data.key, data.val().text, data.val().author);
         // firebase.firestore().doc('/foo/bar').get().then(() => { });
