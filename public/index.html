@@ -68,14 +68,14 @@
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
         // // The Firebase SDK is initialized and available here!
         var config = {
-    apiKey: "AIzaSyBSHR7jjQaMvIff6FxQZ5ypC0tH9DbS6rM",
-    authDomain: "firebook2020.firebaseapp.com",
-    databaseURL: "https://firebook2020-default-rtdb.firebaseio.com",
-    storageBucket: "firebook2020.appspot.com"
-  };
-  if (!firebase.apps.length) {
-    firebase.initializeApp(config);
-}
+        apiKey: "AIzaSyBSHR7jjQaMvIff6FxQZ5ypC0tH9DbS6rM",
+        authDomain: "firebook2020.firebaseapp.com",
+        databaseURL: "https://firebook2020-default-rtdb.firebaseio.com",
+        storageBucket: "firebook2020.appspot.com"
+        };
+        if (!firebase.apps.length) {
+          firebase.initializeApp(config);
+        }
 
         firebase.auth().onAuthStateChanged(user => { });
 
@@ -105,6 +105,18 @@
           }
         };
 
+        function editCurrentItem(data, newValue) {
+          var databaseRef = firebase.database().ref("test");
+          var newPostKey = databaseRef.push().key;
+          var todo = {
+            key: data.val().key,
+            complete: false,
+            description: newValue,
+            time: data.val().time
+          };
+          databaseRef.child(todo.key).update(todo);
+        };
+
         var ul = document.querySelector("ul");
         
 
@@ -119,9 +131,9 @@
           button.onclick = function() {deleteTodo(data)};
           listItem.appendChild(button);
           listItem.id = data.val().key;
-          listItem.append(data.val().description);
 
           function deleteTodo(data) {
+          if (confirm("Are you sure you want to delete?\n\n" + data.val().description)) {
             var databaseRef = firebase.database().ref('test');
             var todo = {
               key: data.val().key,
@@ -130,7 +142,24 @@
               time: data.val().time
             };
             databaseRef.child(todo.key).update(todo);
+          }
           };
+
+         var currentTextBox = document.createElement("INPUT");
+          currentTextBox.type = "text";
+          currentTextBox.value = data.val().description;
+          currentTextBox.style = "width:50%";
+          currentTextBox.id = data.val().key + "textBox";
+          
+          currentTextBox.addEventListener("keyup", function(event) {
+          // Number 13 is the "Enter" key on the keyboard
+          if (event.keyCode === 13) {
+            editCurrentItem(data, currentTextBox.value);
+            this.blur()
+          }
+        });
+
+        listItem.appendChild(currentTextBox);
 
 
           if(ul.childNodes.length > 0) {
@@ -138,24 +167,23 @@
           } else {
             ul.appendChild(listItem);
           }
+
           }
         });
 
         query.on('child_changed', (data) => {
-          console.error(data.val());
           var li = document.getElementById(data.val().key);
           if (li != null) {
             if (data.val().complete == true) {
               li.parentNode.removeChild(li);
             } else {
-              li.textContent = data.val().description;
-
+              var curTextBox = document.getElementById(data.val().key + "textBox");
+              curTextBox.value = data.val().description;
             }
           }
         });
 
-  // addCommentElement(postElement, data.key, data.val().text, data.val().author);
-
+        // addCommentElement(postElement, data.key, data.val().text, data.val().author);
         // firebase.firestore().doc('/foo/bar').get().then(() => { });
         // firebase.functions().httpsCallable('yourFunction')().then(() => { });
         // firebase.messaging().requestPermission().then(() => { });
